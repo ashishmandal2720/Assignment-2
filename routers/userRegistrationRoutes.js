@@ -2,17 +2,16 @@ const router = require('express').Router();
 
 const {
     registerUserData,
-    getbill,
-    sendOtp,
-    singleCustomerDetails,
-    deleteCustomerDetails,
+    loginUserData,
+    verifyEmail,
+    frogotPassword
 }=require('../controller/userRegistrationController');
 
 
 router.post("/register",registerUserData)
-router.post("/sendOtp",getbill)
-router.post("/send", sendOtp);
-// router.get("/:id", singleCustomerDetails);
+router.post("/login",loginUserData)
+router.patch("/verify", verifyEmail);
+router.patch("/forgot", frogotPassword);
 // router.delete("/:id", deleteCustomerDetails);
 
 module.exports = router;

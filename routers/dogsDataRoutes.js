@@ -1,18 +1,18 @@
 const router = require('express').Router();
 
 const {
-    registerDogsData,
-    sendOtp,
-    CustomerDataUpdate,
-    singleCustomerDetails,
-    deleteCustomerDetails,
-}=require('../controller/userRegistrationController');
+    generateDogPairs,
+    submitVote,
+    getAllDogs    
+    // singleCustomerDetails,
+    // deleteCustomerDetails,
+} = require('../controller/dogsDataController');
 
 
-// router.post("/register",registerDogsData)
-// router.post("/sendOtp",sendOtp)
+router.get("/dogsData", getAllDogs);
+router.get("/pairGen", generateDogPairs)
+router.post("/vote", submitVote)
 // router.put("/", CustomerDataUpdate);
-// router.get("/:id", singleCustomerDetails);
 // router.delete("/:id", deleteCustomerDetails);
 
 module.exports = router;

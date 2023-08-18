@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Url = 'mongodb://localhost/dogsTinder'
+const Url = 'mongodb://localhost/assignment_2'
 
 exports.connect = () => {
     mongoose.connect(Url)

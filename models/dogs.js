@@ -9,4 +9,4 @@ const dogsSchema = new mongoose.Schema({
     attributes: { type: String },
 });
 
-module.exports = mongoose.model('dogs', dogsSchema);
+module.exports = mongoose.model('Dog', dogsSchema);
