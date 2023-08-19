@@ -37,13 +37,13 @@ const verifyEmail = async (req, res) => {
   res.send(user);
 };
 
-const findUserByEmail = async (email) => {
+const findUserByEmail = async ( email) => {
   const user = await User.findOne({
     email,
   });
   if (!user) {
-    return res.status(400).json(("Unable to find id in request"));
-    // return false;
+    // return ("Unable to find id in request");
+    return false;
   }
   return user;
 };
