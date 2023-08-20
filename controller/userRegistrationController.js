@@ -20,7 +20,7 @@ const registerUserData = async (req, res) => {
   const {fullName, email, password } = req.body;
   const isExisting = await findUserByEmail(email);
   if (isExisting) {
-    return res.send('Already existing');
+    res.status(400).json({ success: false, message: 'Already existing' });
   }
   const newUser = await createUser(fullName, email, password);
   if (!newUser[0]) {
