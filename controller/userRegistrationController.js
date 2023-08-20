@@ -16,26 +16,37 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+
 const registerUserData = async (req, res) => {
-  const {fullName, email, password } = req.body;
+  const { fullName, email, password } = req.body;
   const isExisting = await findUserByEmail(email);
   if (isExisting) {
-    return res.send('Already existing');
+    return res.status(400).json({ success: false, message: 'User already exists' });
   }
   const newUser = await createUser(fullName, email, password);
-  if (!newUser[0]) {
-    return res.status(400).send({
-      message: 'Unable to create new user',
-    });
+  if (newUser) {
+    return res.status(200).json({ success: true, message: 'User created successfully', user: newUser });
+  } else {
+    return res.status(400).json({ success: false, message: 'Unable to create new user' });
   }
-  res.status(200).send(newUser);
 };
 
 const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
-  const user = await validateUserSignUp(email, otp);
-  res.send(user);
+
+  try {
+    const validationResult = await validateUserSignUp(email, otp);
+
+    if (validationResult.success) {
+      res.status(200).json({ success: true, user: validationResult.user });
+    } else {
+      res.status(400).json({ success: false, message: validationResult.message });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };
+
 
 const findUserByEmail = async ( email) => {
   const user = await User.findOne({
@@ -48,7 +59,7 @@ const findUserByEmail = async ( email) => {
   return user;
 };
 
-const createUser = async (fullName, email, password) => {
+const createUser = async (fullName, email, password, res) => {
   const hashedPassword = await encrypt(password);
   const otpGenerated = generateOTP();
   const newUser = await User.create({
@@ -66,27 +77,39 @@ const createUser = async (fullName, email, password) => {
       OTP: otpGenerated,
     });
     return [true, newUser];
+
   } catch (error) {
     return [false, 'Unable to sign up, Please try again later', error];
   }
 };
 
+
 const validateUserSignUp = async (email, otp) => {
-  const user = await User.findOne({
-    email,
-  });
-  if (!user) {
-    return [false, 'User not found'];
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
+    if (user.otp !== otp) {
+      return { success: false, message: 'Invalid OTP' };
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { $set: { active: true } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return { success: false, message: 'Failed to update user' };
+    }
+
+    return { success: true, user: updatedUser };
+  } catch (error) {
+    return { success: false, message: 'An error occurred', error: error.message };
   }
-  if (user.otp !== otp) {
-    return [false, 'Invalid OTP'];
-  }
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: user._id },
-    { $set: { active: true } },
-    { new: true }
-  );
-  return [true, updatedUser];
 };
 
 
