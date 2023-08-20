@@ -90,39 +90,11 @@ const validateUserSignUp = async (email, otp) => {
 };
 
 
-const createToken =(id)=>{
-  return jwt.sign({id},"apple")
-}
-// const loginUserData = async (req, res) => {
-//   try {
-//     const {  email, password } = req.body;
-//     const findUser = await User.findOne({ email: email })
-//     if (findUser) {
-//       const match = await bcrypt.compare(password, findUser.password)
-//       if (match) {
-//         const OTP = findUser.otp
-//           await sendMail({
-//             to: email,
-//             OTP,
-//           });
-
-//           console.log("otp send",OTP)
-//       }
-//       else {
-//         console.log('invalid password')
-//       }
-//     }
-//     else {
-//       console.log('User not registered')
-//     }
-//   }
-//   catch (err) {
-//     console.log(err)
-//   }
+// const createToken =(id)=>{
+//   return jwt.sign({id},"apple")
 // }
 
-
-const loginUserData = async (req, res) => {
+const loginAdminData = async (req, res) => {
   try {
     const { email, password } = req.body;
     const findUser = await User.findOne({ email: email });
@@ -134,7 +106,6 @@ const loginUserData = async (req, res) => {
           to: email,
           OTP,
         });
-        console.log("OTP sent:", OTP);
         return res.json({ success: true, message: 'OTP sent successfully' });
       } else {
         return res.json({ success: false, message: 'Invalid password' });
@@ -148,36 +119,87 @@ const loginUserData = async (req, res) => {
   }
 };
 
+
 const frogotPassword = async (req, res) => {
-  const { email, otp, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: 'User not found' });
+    const { email } = req.body;
+    const findUser = await User.findOne({ email: email });
+    if (findUser) {
+        const OTP = findUser.otp;
+        await sendMail({
+          to: email,
+          OTP,
+        });
+        console.log("OTP sent:", OTP);
+        return res.json({ success: true, message: 'OTP sent successfully' });
+      } 
+     else {
+      return res.json({ success: false, message: 'User not registered' });
     }
-    if (user.otp !== otp) {
-      return res.json({ success: false, message: 'Invalid OTP' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user._id },
-      { $set: { password: hashedPassword } },
-      { new: true }
-    );
-    return res.json({ success: true, user: updatedUser });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ success: false, message: 'An error occurred' });
-  }
-};
+  }};
 
+  
+  const verifyFrogotPassword = async (req, res) => {
+    const { email, otp, password } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.json({ success: false, message: 'User not found' });
+      }
+      if (user.otp !== otp) {
+        return res.json({ success: false, message: 'Invalid OTP' });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id },
+        { $set: { password: hashedPassword } },
+        { new: true }
+      );
+      return res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+  };
 
-
+  const loginUserData = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const findUser = await User.findOne({ email: email });
+      
+      if (findUser) {
+        const match = await bcrypt.compare(password, findUser.password);
+        
+        if (match) {
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: findUser._id }, 
+            { $set: { active: true } },
+            { new: true }
+          );
+          return res.json({ success: true, message: 'Login successfully', updatedUser });
+        } else {
+          return res.json({ success: false, message: 'Invalid password' });
+        }
+      } else {
+        return res.json({ success: false, message: 'User not registered' });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+  };
+    
+  
 
 module.exports = {
   registerUserData,
   loginUserData,
+  loginAdminData,
   verifyEmail,
-  frogotPassword
+  frogotPassword,
+  verifyFrogotPassword
 }
 
