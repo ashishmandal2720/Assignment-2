@@ -19,6 +19,7 @@ function generateOTP() {
 
 const registerUserData = async (req, res) => {
   const { fullName, email, password } = req.body;
+
   const isExisting = await findUserByEmail(email);
   if (isExisting) {
     return res.status(400).json({ success: false, message: 'User already exists' });
@@ -30,6 +31,7 @@ const registerUserData = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Unable to create new user' });
   }
 };
+
 
 const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
