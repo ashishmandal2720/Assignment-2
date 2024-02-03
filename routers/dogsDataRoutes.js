@@ -3,8 +3,8 @@ const router = require('express').Router();
 const {
     generateDogPairs,
     submitVote,
-    getAllDogs    
-    // singleCustomerDetails,
+    getAllDogs,    
+    submitVote2,
     // deleteCustomerDetails,
 } = require('../controller/dogsDataController');
 
@@ -12,6 +12,7 @@ const {
 router.get("/dogsData", getAllDogs);
 router.get("/pairGen", generateDogPairs)
 router.post("/vote", submitVote)
+router.post("/vote2", submitVote2)
 // router.put("/", CustomerDataUpdate);
 // router.delete("/:id", deleteCustomerDetails);
 
